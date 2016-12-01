@@ -31,6 +31,7 @@ public class AccountItem : Gtk.ListBoxRow {
 	public AccountItem (string title, string  URI) {
 		this.title = title; // maybe get title fro totpman
 		totp_manager = new TOTPManager (URI);
+		this.title = totp_manager.title;
 		update_totp ();
 		timer = new TOTPTimer ();
 		create_layout ();

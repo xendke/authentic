@@ -72,7 +72,9 @@ public uint8[] base32_decode(string input0) {
 	{
 		returnArray[arrayIndex] = curByte;
 	}
-	
+	// for (int i = 0; i < returnArray.length; i++) {
+	// 	stdout.printf ("%x ", returnArray[i]);
+	// } stdout.printf ("\n");
 	return returnArray;
 }
 private static int base32_value_of(char c) throws InvalidSecretError {
@@ -99,7 +101,7 @@ public class TOTPManager {
 
 	string secret;
 	uint8[] secret_bytes;
-	string title;
+	public string title;
 	string subtitle;
 	GLib.ChecksumType algorithm;
 	int timestep;
@@ -108,6 +110,7 @@ public class TOTPManager {
 	public TOTPManager (string URI) {
 		disassemble_URI (URI);
 		secret_bytes = base32_decode (secret);
+		stdout.printf(secret+"\n");
 		hmac = new Hmac (algorithm, secret_bytes);
 		digest_len = 20; // 20-sha1, 32-sha256, 64? sha512
 		for (int i = 0; i < digest_len; i++) {
@@ -118,6 +121,7 @@ public class TOTPManager {
 	private void disassemble_URI (string URI) {
 		title = "";
 		subtitle = "";
+		digits = 6;
 		string[] parameters = {};
 		algorithm = GLib.ChecksumType.SHA1;
 		timestep = 30;
@@ -145,7 +149,7 @@ public class TOTPManager {
 					string salgorithm = s[eq_index+1:s.length];
 					if(salgorithm == "SHA256"){	
 						algorithm = GLib.ChecksumType.SHA256;
-					} else if(salgorithm == "SHA516"){
+					} else if(salgorithm == "SHA512"){
 						algorithm = GLib.ChecksumType.SHA512;
 					} else {
 						algorithm = GLib.ChecksumType.SHA1;
@@ -159,6 +163,7 @@ public class TOTPManager {
 					break;
 				case "digits":
 					int tdigits = int.parse (s[eq_index+1:s.length]);
+					stdout.printf ("digits: %d", tdigits);
 					if(  tdigits == 6 ||  tdigits == 8) {
 						digits = tdigits;
 					} else {
