@@ -27,9 +27,9 @@ public class NewAccountDialog : Gtk.Dialog {
 	private ButtonBox hbutton_box;
 	private new Button add_button;
 	private Button cancel_button;
-	
+
 	public signal void create_account (AccountItem a);
-	
+
 	public NewAccountDialog (MainWindow window) {
 		set_transient_for (window);
 		this.window = window;
@@ -37,7 +37,7 @@ public class NewAccountDialog : Gtk.Dialog {
 		set_resizable (false);
 		set_deletable (false);
 		set_modal (true);
-		
+
 		create_layout ();
 		connect_signals ();
 	}
@@ -48,32 +48,34 @@ public class NewAccountDialog : Gtk.Dialog {
 		main_grid.column_spacing = 8;
 		main_grid.margin_left = 10;
 		main_grid.margin_right = 10;
-		
+
 		name_entry = new Entry ();
 		var label = new Label (_("Name:"));
 		label.halign = Gtk.Align.END;
 		main_grid.attach (label, 0, 0, 1, 1);
 		main_grid.attach (name_entry, 1, 0, 1, 1);
-		
+
 		uri_entry = new Entry ();
+		// test
+		uri_entry.set_text ("otpauth://totp/Example:alice@google.com?secret=JBSWY3DPEHPK3PXP&issuer=Example");
 		label = new Label (_("URI:"));
 		label.halign = Gtk.Align.END;
 		main_grid.attach (label , 0, 1, 1, 1);
 		main_grid.attach (uri_entry, 1, 1, 1, 1);
 
-		
+
 		hbutton_box = new ButtonBox (Gtk.Orientation.HORIZONTAL);
 		hbutton_box.set_layout (Gtk.ButtonBoxStyle.SPREAD);
 		hbutton_box.spacing = 6;
 		hbutton_box.margin_top = 5;
-		
+
 		cancel_button = new Button.with_label (_("Cancel"));
 		add_button = new Button.with_label (_("Add"));
 
 		hbutton_box.pack_start(cancel_button);
 		hbutton_box.pack_start(add_button);
 		main_grid.attach (hbutton_box, 0,2,2,1);
-				
+
 		get_content_area ().add (main_grid);
 	}
 	private void connect_signals () {
@@ -89,7 +91,7 @@ public class NewAccountDialog : Gtk.Dialog {
 		cancel_button.clicked.connect (() => {
 				this.destroy ();
 		});
-		
+
 	}
 	private bool is_valid_uri (string uri) {
 		if (!uri.contains ("otpauth://totp/")) {

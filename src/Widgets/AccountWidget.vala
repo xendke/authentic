@@ -19,8 +19,11 @@ using Granite.Widgets;
 
 using Authenticator.View;
 using Authenticator.Dialogs;
+using Authenticator.Services;
 
 namespace Authenticator.Widgets {
+
+TOTPTimer timer;
 public class AccountWidget : Gtk.Box {
 	private MainWindow window;
 	private NewAccountDialog new_account_dialog;
@@ -40,8 +43,9 @@ public class AccountWidget : Gtk.Box {
 
 	public AccountWidget (MainWindow window) {
 		Object (orientation: Orientation.VERTICAL, spacing: 0);
+		timer = new TOTPTimer ();
 		this.window = window;
-		clipboard = Clipboard.get_for_display (window.get_display (), Gdk.SELECTION_CLIPBOARD); 
+		clipboard = Clipboard.get_for_display (window.get_display (), Gdk.SELECTION_CLIPBOARD);
 		create_layout ();
 		create_right_click_menu ();
 		connect_signals ();
@@ -55,22 +59,22 @@ public class AccountWidget : Gtk.Box {
 		frame.add (no_account_screen);
 		frame.show_all ();
 		main_stack.add_named (frame, "no-account-view");
-		
+
 		scrolled_window = new ScrolledWindow (null, null);
 		scrolled_window.vexpand = true;
 		scrolled_window.hexpand = true;
-		
+
 		list_box = new ListBox ();
 		//list_box.set_selection_mode (Gtk.SelectionMode.NONE);
 		list_box.set_sort_func (sort_account_func);
-		
+
 		scrolled_window.add (list_box);
-		
+
 		frame = new Gtk.Frame (null);
 		frame.add (scrolled_window);
 		frame.margin = 10;
 		frame.show_all ();
-		
+
 		main_stack.add_named (frame, "account-view");
 
 		var grid = new Grid ();
@@ -93,12 +97,12 @@ public class AccountWidget : Gtk.Box {
 		right_click_menu.append(right_click_copy);
 		right_click_menu.append(right_click_edit);
 		right_click_menu.append(right_click_delete);
-		
+
 		right_click_menu.show_all ();
 	}
 	private void connect_signals () {
 		no_account_screen.get_button_from_index(0).clicked.connect(add_account); // connect Welome screen button
-	   
+
 	    list_box.button_press_event.connect_after ( (event) => { // clicks on ListBox
 				row_targeted = (AccountItem )list_box.get_row_at_y((int)event.y);
 				if(row_targeted == null){ // click on non-row
@@ -127,10 +131,10 @@ public class AccountWidget : Gtk.Box {
 		list_box.show_all ();
 
 		var inc = list_box.get_children ().length ();
-		
+
 		if (inc == 0) {
 			main_stack.set_visible_child_name ("no-account-view");
-			
+
 			//add small delay if daemon loads after application and list is empty
 			//if (Hourglass.saved.alarms.length != 0) {
 				//message ("hello");
@@ -146,7 +150,7 @@ public class AccountWidget : Gtk.Box {
 		if (row1 is AccountItem && row2 is AccountItem) {
 			var time1 = ((AccountItem) row1).title;
 			var time2 = ((AccountItem) row2).title;
-			
+
 			return time1.collate (time2);
 		} else {
 			return 0;
@@ -154,12 +158,12 @@ public class AccountWidget : Gtk.Box {
 	}
 	private void append_account (AccountItem a) {
 		list_box.prepend (a);
-		
+
 		//a.state_toggled.connect ((b) => {
 		//      message ("toggled");
 		//      Hourglass.dbus_server.toggle_alarm (a.to_string ());
         //});
-		
+
 		//Hourglass.dbus_server.add_alarm (a.to_string ());
 		update ();
 	}

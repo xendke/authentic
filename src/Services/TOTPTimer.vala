@@ -16,40 +16,52 @@
 using Authenticator.Widgets;
 namespace Authenticator.Services {
 public class TOTPTimer {
-	private GLib.Timer timer = new GLib.Timer ();
 	private Thread<int> timer_thread;
+	int[] timesteps;
+	int[] counters;
 
-	public signal void change_totp ();
-	int period;
 	private bool alive;
+	public signal void time_is_up (int timestep);
 
 	public TOTPTimer (){//period = 30
 		alive = true;
-		timer_thread = new Thread<int> ("timer_thread", this.timer_loop);
-		connect_signals ();
+		timer_thread = new Thread<int> ("timer_thread", timer_loop);
 	}
-	private  int timer_loop (){
+
+	private int timer_loop (){
 		while (alive) {
-			timer.start ();
-			stdout.printf ("timer started\n");
-			while (timer.elapsed () < 30) {//period
-				Thread.usleep (1000000);
-				stdout.printf ("%f\n", timer.elapsed ());
-				
-				if(!alive) {
-					Thread.exit (0);
-				}
+			Thread.usleep (1000000);
+			if (timesteps.length <= 0) {
+				continue;
 			}
-			timer.stop ();
-			change_totp ();
+			for (int i = 0; i < timesteps.length; i++) {
+				if (counters[i] > timesteps[i]) {
+					time_is_up (timesteps[i]);
+					stdout.printf("time is up: %d", timesteps[i]);
+					counters[i] = 0;
+				}
+				counters[i]++;
+			}
 		}
+		Thread.exit(0);
 		return 0;
 	}
-	public void kill () {
-		this.alive = false;
+	public void register(int timestep) {
+		if(timestep_exists(timestep)){
+			return;
+		} else {
+			timesteps+=timestep;
+			counters+=0;
+		}
 	}
-	private void connect_signals () {
-		
+	private bool timestep_exists (int timestep) {
+		for (int i = 0; i < timesteps.length; i++) {
+			if(timesteps[i] == timestep) return true;
+		}
+		return false;
+	}
+	public void kill () {
+		alive = false;
 	}
 }
 }

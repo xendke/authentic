@@ -14,9 +14,10 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 using GLib;
+using Authenticator.Widgets;
 
 namespace Authenticator.Services {
-	
+
 errordomain InvalidSecretError {
 	INVALID_CHAR
 }
@@ -28,20 +29,20 @@ public uint8[] base32_decode(string input0) {
 	while( input.has_suffix("=")) { // trim the  == padding
 		input = input[0:input.length-1];
 	}
-	
+
 	input = input.ascii_up (); // capitalize
-	
+
 	// http://stackoverflow.com/users/904128/shane from http://stackoverflow.com/questions/641361/base32-decoding
-	
+
 	int byteCount = input.length * 5 / 8; //this must be TRUNCATED
 	uint8[byteCount] returnArray = {};
 	for (int i = 0; i < byteCount; i++) {
 		returnArray += 0x00;
 	}
-	
+
 	uint8 curByte = 0, bitsRemaining = 8;
 	int mask = 0, arrayIndex = 0;
-	
+
 	for (int i = 0; i < input.length; i++) {
 		char c = input[i];
 		int cValue = 0;
@@ -50,7 +51,7 @@ public uint8[] base32_decode(string input0) {
 		} catch (InvalidSecretError e ){
 			stdout.printf ("Error: %s\n", e.message );
 		}
-		
+
 		if (bitsRemaining > 5)
 		{
 			mask = cValue << (bitsRemaining - 5);
@@ -66,7 +67,7 @@ public uint8[] base32_decode(string input0) {
 			bitsRemaining += 3;
 		}
 	}
-	
+
 	//if we didn't end with a full byte
 	if (arrayIndex != byteCount)
 	{
@@ -79,7 +80,7 @@ public uint8[] base32_decode(string input0) {
 }
 private static int base32_value_of(char c) throws InvalidSecretError {
 	int value = (int)c;
-	
+
 	//65-90 == uppercase letters
 	if (value < 91 && value > 64)
 	{
@@ -90,10 +91,11 @@ private static int base32_value_of(char c) throws InvalidSecretError {
 	{
 		return value - 24;
 	}
-	
+
 	throw new InvalidSecretError.INVALID_CHAR("Character is not a Base32 character.");
 }
-	
+
+
 public class TOTPManager {
 	Hmac hmac;
 	uint8[] digest = {};
@@ -102,22 +104,28 @@ public class TOTPManager {
 	string secret;
 	uint8[] secret_bytes;
 	public string title;
-	string subtitle;
+	public string subtitle;
+	string issuer;
 	GLib.ChecksumType algorithm;
 	int timestep;
 	int digits;
-	
+
+	int current_time;
+
+	public signal void change_totp ();
+
 	public TOTPManager (string URI) {
 		disassemble_URI (URI);
+		timer.register (timestep);
 		secret_bytes = base32_decode (secret);
-		stdout.printf(secret+"\n");
 		hmac = new Hmac (algorithm, secret_bytes);
 		digest_len = 20; // 20-sha1, 32-sha256, 64? sha512
 		for (int i = 0; i < digest_len; i++) {
 			digest+= 0x00;
 		}
+		connect_signals ();
 	}
-	
+
 	private void disassemble_URI (string URI) {
 		title = "";
 		subtitle = "";
@@ -129,7 +137,7 @@ public class TOTPManager {
 			int start = 15;
 			int col_index = URI.index_of (":", start);
 			int quest_index = URI.index_of ("?");
-			if (col_index == -1) {	
+			if (col_index == -1) {
 				title = URI[start:quest_index];
 			} else {
 				title = URI[start:col_index];
@@ -147,7 +155,7 @@ public class TOTPManager {
 					break;
 				case "algorithm":
 					string salgorithm = s[eq_index+1:s.length];
-					if(salgorithm == "SHA256"){	
+					if(salgorithm == "SHA256"){
 						algorithm = GLib.ChecksumType.SHA256;
 					} else if(salgorithm == "SHA512"){
 						algorithm = GLib.ChecksumType.SHA512;
@@ -159,7 +167,7 @@ public class TOTPManager {
 					timestep = int.parse (s[eq_index+1:s.length]);
 					break;
 				case "issuer":
-					title = s[eq_index+1:s.length];
+					issuer = s[eq_index+1:s.length];
 					break;
 				case "digits":
 					int tdigits = int.parse (s[eq_index+1:s.length]);
@@ -169,7 +177,7 @@ public class TOTPManager {
 					} else {
 						digits = 6;
 					}
-					break; 
+					break;
 				default:
 					stdout.printf ("URI Parameter not caught: %s\n", param);
 					break;
@@ -223,9 +231,9 @@ public class TOTPManager {
 	private uint8[] get_time (int timestep = 30) { // default timestep 30
 		int64 real_time = get_real_time (); // microseconds
 		uint64 ureal_time = (((uint64)real_time)/1000000) / timestep; //to seconds and per time step
-		
+
 		uint8[4] byteArray = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
-		
+
 		byteArray[0] = (uint8)((ureal_time >> 56) & 0xFF);
 		byteArray[1] = (uint8)((ureal_time >> 48) & 0xFF);
 		byteArray[2] = (uint8)((ureal_time >> 40) & 0xFF);
@@ -234,7 +242,7 @@ public class TOTPManager {
 		byteArray[5] = (uint8)((ureal_time >> 16) & 0xFF);
 		byteArray[6] = (uint8)((ureal_time >> 8) & 0xFF);
 		byteArray[7] = (uint8)((ureal_time >> 0) & 0xFF);
-		
+
 		return byteArray;
 	}
 	public string get_current_totp () {
@@ -243,7 +251,7 @@ public class TOTPManager {
 		hmac.update (T);
 
 		hmac.get_digest (digest, ref digest_len);
-		
+
 		uint8 offsetbyte = digest[digest_len-1];
 		offsetbyte  &= ~(1 << 7);
 		offsetbyte  &= ~(1 << 6);
@@ -252,11 +260,21 @@ public class TOTPManager {
 		int offset = offsetbyte; // only use right-most 4 bits for offset.
 
 		uint8[4] nbuffer = digest[offset:offset+4];
-		
+
 		//clear top bit to reach nbuffer of 31 bit.
 		nbuffer[0]  &= ~(1 << 7);
 		string full_totp = hex_to_dec (nbuffer).to_string ();
 		return full_totp[full_totp.length-digits:full_totp.length];
+	}
+	private void check_for_totp_update (int t) {
+		if(t == this.timestep) {
+			change_totp ();
+		}
+	}
+	private void connect_signals () {
+		timer.time_is_up.connect ((t) => {
+				check_for_totp_update (t);
+			});
 	}
 }
 }
