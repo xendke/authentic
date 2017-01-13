@@ -78,10 +78,11 @@ public class AccountItem : Gtk.ListBoxRow {
 		}
 		return t;
 	}
+	public void kill () {
+		totp_manager.change_totp.disconnect (update_totp);
+	}
 	private void connect_signals () {
-		totp_manager.change_totp.connect (() => {
-				update_totp ();
-			});
+		totp_manager.change_totp.connect (update_totp);
 	}
 }
 }

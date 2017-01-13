@@ -22,8 +22,6 @@ using Authenticator.Dialogs;
 using Authenticator.Services;
 
 namespace Authenticator.Widgets {
-
-TOTPTimer timer;
 public class AccountWidget : Gtk.Box {
 	private MainWindow window;
 	private NewAccountDialog new_account_dialog;
@@ -43,7 +41,6 @@ public class AccountWidget : Gtk.Box {
 
 	public AccountWidget (MainWindow window) {
 		Object (orientation: Orientation.VERTICAL, spacing: 0);
-		timer = new TOTPTimer ();
 		this.window = window;
 		clipboard = Clipboard.get_for_display (window.get_display (), Gdk.SELECTION_CLIPBOARD);
 		create_layout ();
@@ -125,6 +122,7 @@ public class AccountWidget : Gtk.Box {
 	}
 	private void remove_account (AccountItem a) {
 		list_box.remove (a);
+		a.kill();
 		update ();
 	}
 	private void update () {

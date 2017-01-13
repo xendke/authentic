@@ -14,7 +14,7 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 using GLib;
-using Authenticator.Widgets;
+using Authenticator;
 
 namespace Authenticator.Services {
 
@@ -95,7 +95,47 @@ private static int base32_value_of(char c) throws InvalidSecretError {
 	throw new InvalidSecretError.INVALID_CHAR("Character is not a Base32 character.");
 }
 
-
+private int hex_value_of(string bit) {
+	switch(bit) {
+	case "a":
+		return 10;
+	case "b":
+		return 11;
+	case "c":
+		return 12;
+	case "d":
+		return 13;
+	case "e":
+		return 14;
+	case "f":
+		return 15;
+	default:
+		return int.parse(bit);
+	}
+}
+private int hex_to_dec(uint8[] bytes){
+	string[] s = {"","","",""};
+	int decimal = 0;
+	int count = 0;
+	int coefficient = 0;
+	for (int i = 3; i >= 0; i--) {
+		s[i] = "%x".printf (bytes[i]);
+		for (int j = 1; j >= 0 ; j--) {
+			coefficient = (int)Math.pow (16, count);
+			if(s[i].length == 1) {
+				decimal += (coefficient)*(hex_value_of(s[i].to_string ()));
+				count++;
+				count++; // add 2 because the next halfbyte is 0 and not in s[i].
+				break;
+			}
+			else{
+				decimal += (coefficient)*(hex_value_of(s[i][j].to_string ()));
+				count++;
+			}
+		}
+	}
+	return decimal;
+}
 public class TOTPManager {
 	Hmac hmac;
 	uint8[] digest = {};
@@ -110,8 +150,6 @@ public class TOTPManager {
 	int timestep;
 	int digits;
 
-	int current_time;
-
 	public signal void change_totp ();
 
 	public TOTPManager (string URI) {
@@ -124,6 +162,10 @@ public class TOTPManager {
 			digest+= 0x00;
 		}
 		connect_signals ();
+	}
+
+	~TOTPManager () {
+		timer.time_is_up.disconnect (check_for_update);
 	}
 
 	private void disassemble_URI (string URI) {
@@ -187,47 +229,6 @@ public class TOTPManager {
 			throw new InvalidURI.NOT_TOTP ("URI is not type totp.");
 		}
 	}
-	private int hex_value_of(string bit) {
-		switch(bit) {
-		case "a":
-			return 10;
-		case "b":
-			return 11;
-		case "c":
-			return 12;
-		case "d":
-			return 13;
-		case "e":
-			return 14;
-		case "f":
-			return 15;
-		default:
-			return int.parse(bit);
-		}
-	}
-	private int hex_to_dec(uint8[] bytes){
-		string[] s = {"","","",""};
-		int decimal = 0;
-		int count = 0;
-		int coefficient = 0;
-		for (int i = 3; i >= 0; i--) {
-			s[i] = "%x".printf (bytes[i]);
-			for (int j = 1; j >= 0 ; j--) {
-				coefficient = (int)Math.pow (16, count);
-				if(s[i].length == 1) {
-					decimal += (coefficient)*(hex_value_of(s[i].to_string ()));
-					count++;
-					count++; // add 2 because the next halfbyte is 0 and not in s[i].
-					break;
-				}
-				else{
-					decimal += (coefficient)*(hex_value_of(s[i][j].to_string ()));
-					count++;
-				}
-			}
-		}
-		return decimal;
-	}
 	private uint8[] get_time (int timestep = 30) { // default timestep 30
 		int64 real_time = get_real_time (); // microseconds
 		uint64 ureal_time = (((uint64)real_time)/1000000) / timestep; //to seconds and per time step
@@ -266,15 +267,13 @@ public class TOTPManager {
 		string full_totp = hex_to_dec (nbuffer).to_string ();
 		return full_totp[full_totp.length-digits:full_totp.length];
 	}
-	private void check_for_totp_update (int t) {
+	private void check_for_update (int t) {
 		if(t == this.timestep) {
 			change_totp ();
 		}
 	}
 	private void connect_signals () {
-		timer.time_is_up.connect ((t) => {
-				check_for_totp_update (t);
-			});
+		timer.time_is_up.connect (check_for_update);
 	}
 }
 }

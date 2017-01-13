@@ -14,8 +14,10 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-namespace Authenticator {
+using Authenticator.Services;
 
+namespace Authenticator {
+TOTPTimer timer;
 public class App : Granite.Application {
 
     View.MainWindow main_window;
@@ -31,6 +33,7 @@ public class App : Granite.Application {
 
         main_window = new View.MainWindow (this);
         main_window.show_all ();
+        timer = new TOTPTimer ();
     }
 
     public static int main (string[] args) {
