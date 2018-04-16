@@ -16,6 +16,7 @@
 using GLib;
 using Authenticator;
 
+
 namespace Authenticator.Services {
 
 errordomain InvalidSecretError {
@@ -123,13 +124,13 @@ private int hex_to_dec(uint8[] bytes){
 		for (int j = 1; j >= 0 ; j--) {
 			coefficient = (int)Math.pow (16, count);
 			if(s[i].length == 1) {
-				decimal += (coefficient)*(hex_value_of(s[i].to_string ()));
+				decimal += coefficient*(hex_value_of(s[i].to_string ()));
 				count++;
 				count++; // add 2 because the next halfbyte is 0 and not in s[i].
 				break;
 			}
 			else{
-				decimal += (coefficient)*(hex_value_of(s[i][j].to_string ()));
+				decimal += coefficient*(hex_value_of(s[i][j].to_string ()));
 				count++;
 			}
 		}
@@ -149,25 +150,27 @@ public class TOTPManager {
 	GLib.ChecksumType algorithm;
 	int timestep;
 	int digits;
+	TOTPTimer timer;
+	
 
 	public signal void change_totp ();
 
 	public TOTPManager (string URI) {
 		disassemble_URI (URI);
-		timer.register (timestep);
+		// timer.register (timestep);
 		secret_bytes = base32_decode (secret);
 		hmac = new Hmac (algorithm, secret_bytes);
 		digest_len = 20; // 20-sha1, 32-sha256, 64? sha512
 		for (int i = 0; i < digest_len; i++) {
 			digest+= 0x00;
 		}
+		timer = new TOTPTimer (this.timestep);
 		connect_signals ();
 	}
 
 	~TOTPManager () {
-		timer.time_is_up.disconnect (check_for_update);
+		this.timer.alive = false;
 	}
-
 	private void disassemble_URI (string URI) {
 		title = "";
 		subtitle = "";
@@ -267,10 +270,8 @@ public class TOTPManager {
 		string full_totp = hex_to_dec (nbuffer).to_string ();
 		return full_totp[full_totp.length-digits:full_totp.length];
 	}
-	private void check_for_update (int t) {
-		if(t == this.timestep) {
-			change_totp ();
-		}
+	private void check_for_update () {
+		change_totp ();
 	}
 	private void connect_signals () {
 		timer.time_is_up.connect (check_for_update);

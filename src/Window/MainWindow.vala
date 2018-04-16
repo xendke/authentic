@@ -29,7 +29,7 @@ public class MainWindow : Gtk.Window {
 	public MainWindow (Granite.Application app) {
 		// Window specific stuff
 		set_application (app);
-		set_default_size (600, 414);
+		set_default_size (600, 468);
 		window_position = Gtk.WindowPosition.CENTER;
 
 		
@@ -53,10 +53,10 @@ public class MainWindow : Gtk.Window {
 	}
 
 	public void setup_layout () {	
-		var main_box = new Box (Orientation.VERTICAL, 0);
+		//  var main_box = new Box (Orientation.VERTICAL, 0);
 		account_widget = new AccountWidget (this);
-		main_box.pack_start (account_widget, true, true, 0);
-		this.add (main_box);
+		//  main_box.pack_start (account_widget, true, true, 0);
+		this.add (account_widget);
 	}
 
 	public void connect_signals () {

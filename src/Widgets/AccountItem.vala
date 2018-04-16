@@ -27,6 +27,7 @@ public class AccountItem : Gtk.ListBoxRow {
 	Gtk.Label title_label;
 	Gtk.Label totp_label;
 	Gtk.Label subtitle_label;
+	Gtk.ProgressBar progress_bar;
 
 	public signal void changed_totp ();
 
@@ -37,32 +38,38 @@ public class AccountItem : Gtk.ListBoxRow {
 			this.title = totp_manager.title;
 		}
 		this.subtitle = totp_manager.subtitle;
+		create_layout ();		
 		update_totp ();
-		create_layout ();
 		connect_signals ();
 	}
 
 	private void create_layout () {
 		var grid = new Grid();
 
-		title_label = new Label (title);
+		title_label = new Gtk.Label (title);
 		title_label.get_style_context ().add_class ("account-title");
 
-		subtitle_label = new Label (subtitle);
+		subtitle_label = new Gtk.Label (subtitle);
 		subtitle_label.get_style_context ().add_class ("account-subtitle");
 
-		totp_label = new Label (prettify_totp(current_totp));
+		string text = prettify_totp(current_totp);
+		totp_label = new Gtk.Label (text);
 		totp_label.get_style_context ().add_class ("account-password");
 
+		progress_bar = new Gtk.ProgressBar ();
+		progress_bar.get_style_context ().add_class ("account-progress");
+
 		grid.attach (title_label, 0, 0, 1, 1);
-		grid.attach (subtitle_label, 0, 1, 1, 1);
+		grid.attach (subtitle_label, 0, 1, 1, 1);  
 		grid.attach (new Spacer.w_hexpand (), 1, 0, 1, 2);
-    grid.attach (totp_label, 2, 0, 2, 2);
+		grid.attach (totp_label, 2, 0, 2, 1);
+		grid.attach (progress_bar, 2, 1, 2, 1);
 		this.add (grid);
 	}
 	public void update_totp () {
 		current_totp = totp_manager.get_current_totp ();
-		totp_label.set_text (prettify_totp(current_totp));
+		string text = prettify_totp (current_totp);
+		totp_label.set_text (text);
 		changed_totp ();
 	}
 	private string prettify_totp (string totp){
