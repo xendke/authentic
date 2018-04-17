@@ -58,6 +58,7 @@ public class AccountItem : Gtk.ListBoxRow {
 
 		progress_bar = new Gtk.ProgressBar ();
 		progress_bar.get_style_context ().add_class ("account-progress");
+		
 
 		grid.attach (title_label, 0, 0, 1, 1);
 		grid.attach (subtitle_label, 0, 1, 1, 1);  
@@ -70,6 +71,7 @@ public class AccountItem : Gtk.ListBoxRow {
 		current_totp = totp_manager.get_current_totp ();
 		string text = prettify_totp (current_totp);
 		totp_label.set_text (text);
+		this.progress_bar.set_fraction (0.0);
 		changed_totp ();
 	}
 	private string prettify_totp (string totp){
@@ -85,11 +87,27 @@ public class AccountItem : Gtk.ListBoxRow {
 		}
 		return t;
 	}
-	public void kill () {
-		totp_manager.change_totp.disconnect (update_totp);
+	private void handle_increase_bar () {
+		double progress = this.progress_bar.get_fraction ();
+
+		// Update the bar:
+		progress = progress + (1.0/(double)this.totp_manager.timestep);
+
+		if (progress >= 1.0) {
+			progress = 0.0;
+		}
+
+		this.progress_bar.set_fraction (progress);
+	}
+	private void check_for_update (int timestep) {
+		if (this.totp_manager.timestep == timestep) {
+			update_totp ();
+		}
 	}
 	private void connect_signals () {
-		totp_manager.change_totp.connect (update_totp);
+		timer.register(this.totp_manager.timestep);
+		timer.time_is_up.connect (check_for_update);
+		timer.increase_bar.connect (handle_increase_bar);
 	}
 }
 }

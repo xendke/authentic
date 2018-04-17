@@ -16,25 +16,39 @@
 using Authenticator.Widgets;
 using Gee;
 using GLib;
+using Gtk;
 
 namespace Authenticator.Services {
 public class TOTPTimer {
-	public bool alive;
-	public signal void time_is_up ();
+	bool hasStarted;
+	int timePassed;
+	ArrayList<int> timesteps;
 
+	public signal void time_is_up (int period);
+	public signal void increase_bar ();
 
-	private bool done() {
-		time_is_up ();
-		stdout.printf("times up\n");
-		return this.alive;
-	}
-
-	public TOTPTimer (int timestep){
+	public TOTPTimer (){
+		this.hasStarted = true;
+		this.timePassed = 0;
+		timesteps = new ArrayList<int> ();
+		GLib.Timeout.add_seconds(1, this.tick);
 		stdout.printf("totp timer started\n");
-		stdout.printf("%u\n",timestep);
-		GLib.Timeout.add(timestep*1000, this.done);
 	}
-	public void register(int timestep) { 
+	bool tick () {
+		// max uint check
+		this.timePassed++;
+		stdout.printf("%u\n", this.timePassed);
+		for (int i = 0; i < timesteps.size; i++) {
+			if (timePassed%timesteps[i] == 0){
+				time_is_up(timesteps[i]);
+			}
+		}
+		increase_bar();
+		return true;
+	}
+	public void register(int timestep) {
+		// check unique
+		this.timesteps.add(timestep);
 	}
 	public void deregister(int timestep) {
 	}

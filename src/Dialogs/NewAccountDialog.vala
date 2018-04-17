@@ -57,7 +57,7 @@ public class NewAccountDialog : Gtk.Dialog {
 
 		uri_entry = new Entry ();
 		// test
-		uri_entry.set_text ("otpauth://totp/Example:alice@google.com?secret=JBSWY3DPEHPK3PXP&issuer=Example");
+		uri_entry.set_text ("otpauth://totp/Example:alice@google.com?secret=JBSWY3DPEHPK3PXP&issuer=Example&period=10");
 		label = new Label (_("URI:"));
 		label.halign = Gtk.Align.END;
 		main_grid.attach (label , 0, 1, 1, 1);

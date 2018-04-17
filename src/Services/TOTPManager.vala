@@ -148,13 +148,9 @@ public class TOTPManager {
 	public string subtitle;
 	string issuer;
 	GLib.ChecksumType algorithm;
-	int timestep;
+	public int timestep;
 	int digits;
-	TOTPTimer timer;
 	
-
-	public signal void change_totp ();
-
 	public TOTPManager (string URI) {
 		disassemble_URI (URI);
 		// timer.register (timestep);
@@ -164,13 +160,8 @@ public class TOTPManager {
 		for (int i = 0; i < digest_len; i++) {
 			digest+= 0x00;
 		}
-		timer = new TOTPTimer (this.timestep);
-		connect_signals ();
 	}
 
-	~TOTPManager () {
-		this.timer.alive = false;
-	}
 	private void disassemble_URI (string URI) {
 		title = "";
 		subtitle = "";
@@ -269,12 +260,6 @@ public class TOTPManager {
 		nbuffer[0]  &= ~(1 << 7);
 		string full_totp = hex_to_dec (nbuffer).to_string ();
 		return full_totp[full_totp.length-digits:full_totp.length];
-	}
-	private void check_for_update () {
-		change_totp ();
-	}
-	private void connect_signals () {
-		timer.time_is_up.connect (check_for_update);
 	}
 }
 }
