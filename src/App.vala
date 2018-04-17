@@ -22,7 +22,7 @@ public class App : Granite.Application {
     View.MainWindow main_window;
 
 	construct {
-        program_name = "Authenticator";
+        program_name = "Authentic";
     }
 
     public override void activate() {

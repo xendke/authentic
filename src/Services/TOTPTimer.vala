@@ -21,7 +21,7 @@ using Gtk;
 namespace Authenticator.Services {
 public class TOTPTimer {
 	bool hasStarted;
-	int timePassed;
+	public int timePassed;
 	ArrayList<int> timesteps;
 
 	public signal void time_is_up (int period);
@@ -47,13 +47,12 @@ public class TOTPTimer {
 		return true;
 	}
 	public void register(int timestep) {
-		// check unique
-		this.timesteps.add(timestep);
+		// unique timesteps only
+		if (!this.timesteps.contains(timestep)) {
+			this.timesteps.add(timestep);
+		}
 	}
 	public void deregister(int timestep) {
-	}
-
-	public void kill () {
 	}
 }
 }

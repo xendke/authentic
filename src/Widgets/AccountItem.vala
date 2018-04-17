@@ -39,7 +39,7 @@ public class AccountItem : Gtk.ListBoxRow {
 		}
 		this.subtitle = totp_manager.subtitle;
 		create_layout ();		
-		update_totp ();
+		initiate_totp ();
 		connect_signals ();
 	}
 
@@ -48,9 +48,11 @@ public class AccountItem : Gtk.ListBoxRow {
 
 		title_label = new Gtk.Label (title);
 		title_label.get_style_context ().add_class ("account-title");
+		title_label.set_xalign (0);
 
 		subtitle_label = new Gtk.Label (subtitle);
 		subtitle_label.get_style_context ().add_class ("account-subtitle");
+		subtitle_label.set_xalign (0);
 
 		string text = prettify_totp(current_totp);
 		totp_label = new Gtk.Label (text);
@@ -58,7 +60,6 @@ public class AccountItem : Gtk.ListBoxRow {
 
 		progress_bar = new Gtk.ProgressBar ();
 		progress_bar.get_style_context ().add_class ("account-progress");
-		
 
 		grid.attach (title_label, 0, 0, 1, 1);
 		grid.attach (subtitle_label, 0, 1, 1, 1);  
@@ -67,10 +68,19 @@ public class AccountItem : Gtk.ListBoxRow {
 		grid.attach (progress_bar, 2, 1, 2, 1);
 		this.add (grid);
 	}
+	private void initiate_totp () {
+		update_totp ();
+		// set initial progress bar value
+		// find the time passed since last update and set the bar fraction accordingly
+		double time_passed = timer.timePassed%(double)this.totp_manager.timestep;
+		double progress = time_passed * (1.0/(double)this.totp_manager.timestep);
+		this.progress_bar.set_fraction (progress);
+	}
 	public void update_totp () {
 		current_totp = totp_manager.get_current_totp ();
 		string text = prettify_totp (current_totp);
 		totp_label.set_text (text);
+		// reset progress bar after updating to latest totp
 		this.progress_bar.set_fraction (0.0);
 		changed_totp ();
 	}
@@ -89,23 +99,17 @@ public class AccountItem : Gtk.ListBoxRow {
 	}
 	private void handle_increase_bar () {
 		double progress = this.progress_bar.get_fraction ();
-
-		// Update the bar:
 		progress = progress + (1.0/(double)this.totp_manager.timestep);
-
-		if (progress >= 1.0) {
-			progress = 0.0;
-		}
-
 		this.progress_bar.set_fraction (progress);
 	}
 	private void check_for_update (int timestep) {
+		// update only if the signal received is of the correct timestep
 		if (this.totp_manager.timestep == timestep) {
 			update_totp ();
 		}
 	}
 	private void connect_signals () {
-		timer.register(this.totp_manager.timestep);
+		timer.register(this.totp_manager.timestep); // make sure timer knows of this timestep
 		timer.time_is_up.connect (check_for_update);
 		timer.increase_bar.connect (handle_increase_bar);
 	}
