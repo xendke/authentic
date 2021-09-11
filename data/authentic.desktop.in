@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=Authentic
+GenericName=Authentic
+Comment=2 Factor Authentication
+Categories=Utility;
+Exec=com.github.xendke.authentic
+Icon=com.github.xendke.authentic
+Terminal=false
+Type=Application
+Keywords=Authentic;Security;OTP;

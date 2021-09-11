@@ -26,15 +26,15 @@ public class MainWindow : Gtk.Window {
 	Gtk.Button bar_add_button;
 	AccountWidget account_widget;
 	
-	public MainWindow (Granite.Application app) {
+	public MainWindow (Authenticator.Application app) {
 		// Window specific stuff
 		set_application (app);
 		set_default_size (600, 468);
 		window_position = Gtk.WindowPosition.CENTER;
 
 		
-		StyleManager.add_stylesheet ("style/text.css");
-		StyleManager.add_stylesheet ("style/elements.css");
+		//  StyleManager.add_stylesheet ("style/text.css");
+		//  StyleManager.add_stylesheet ("style/elements.css");
 	
 		// Set up other GUI elements
 		setup_headerbar (app);
@@ -42,7 +42,7 @@ public class MainWindow : Gtk.Window {
 		connect_signals ();
 	}
 
-	public void setup_headerbar (Granite.Application app) {
+	public void setup_headerbar (Authenticator.Application app) {
 		// Header bar
 		this.bar = new Gtk.HeaderBar ();
 		bar.set_show_close_button (true);

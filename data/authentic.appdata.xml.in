@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2019 Your Name <you@email.com> -->
+<component type="desktop">
+  <id>com.github.xendke.authentic</id>
+  <metadata_license>CC0</metadata_license>
+  <name>Authentic</name>
+  <summary>2 Factor Authentication</summary>
+  <description>
+    <p>Secure your online accounts by using 2 Factor Authentication.</p>
+  </description>
+</component>

@@ -1,7 +1,0 @@
-GtkListBoxRow {
-    padding: 10px;
-}
-GtkListBoxRow:selected {
-    color: black;
-    background-color: #CCCCCC;
-}

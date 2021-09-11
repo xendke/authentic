@@ -1,0 +1,47 @@
+# Italian translations for com.github.xendke.authentic package.
+# Copyright (C) 2021 THE com.github.xendke.authentic'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the com.github.xendke.authentic package.
+# Automatically generated, 2021.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: com.github.xendke.authentic\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2021-09-11 13:32-0400\n"
+"PO-Revision-Date: 2021-09-11 13:32-0400\n"
+"Last-Translator: Automatically generated\n"
+"Language-Team: none\n"
+"Language: it\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=ASCII\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: src/Application.vala:11
+msgid "Click me!"
+msgstr ""
+
+#: src/Application.vala:25
+msgid "Hello World"
+msgstr ""
+
+#: data/authentic.desktop.in:3 data/authentic.desktop.in:4
+#: data/authentic.appdata.xml.in:6
+msgid "Authentic"
+msgstr ""
+
+#: data/authentic.desktop.in:5 data/authentic.appdata.xml.in:7
+msgid "2 Factor Authentication"
+msgstr ""
+
+#: data/authentic.desktop.in:8
+msgid "com.github.xendke.authentic"
+msgstr ""
+
+#: data/authentic.desktop.in:11
+msgid "Authentic;Security;OTP;"
+msgstr ""
+
+#: data/authentic.appdata.xml.in:9
+msgid "Secure your online accounts by using 2 Factor Authentication."
+msgstr ""
