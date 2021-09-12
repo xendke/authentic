@@ -162,7 +162,7 @@ public class TOTPManager {
 		}
 	}
 
-	private void disassemble_URI (string URI) {
+	private void disassemble_URI (string URI) throws InvalidURI {
 		title = "";
 		subtitle = "";
 		digits = 6;

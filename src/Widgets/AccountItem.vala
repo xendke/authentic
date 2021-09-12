@@ -44,7 +44,8 @@ public class AccountItem : Gtk.ListBoxRow {
 	}
 
 	private void create_layout () {
-		var grid = new Grid();
+		var grid = new Grid ();
+		grid.get_style_context ().add_class ("grid");
 
 		title_label = new Gtk.Label (title);
 		title_label.get_style_context ().add_class ("account-title");

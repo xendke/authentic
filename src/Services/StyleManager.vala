@@ -18,15 +18,15 @@ using Gtk;
 namespace Authenticator.Services {
 public class StyleManager {
 	public static void add_stylesheet (string path) {
-		var css_file = "/home/xendke/Code/GitHub/authentic/data/" + path;
+		var resource = "com/github/xendke/authentic/" + path;
 		var provider = new CssProvider ();
-		try {
-			provider.load_from_path(css_file);
-			StyleContext.add_provider_for_screen (Gdk.Screen.get_default (), provider, Gtk.STYLE_PROVIDER_PRIORITY_USER);
-		} catch (Error e) {
-			error ("Error loading CSS: " + path );
-		}	
 
+		provider.load_from_resource(resource);
+		StyleContext.add_provider_for_screen (
+			Gdk.Screen.get_default (),
+			provider,
+			Gtk.STYLE_PROVIDER_PRIORITY_USER
+		);
 	}
 }
 }

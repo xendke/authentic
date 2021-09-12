@@ -1,0 +1,23 @@
+.grid {
+  padding: 10px;
+}
+
+.grid:selected {
+  color: black;
+  background-color: #cccccc;
+}
+
+.account-title {
+  font-size: 25px;
+  font-family: Open Sans Light;
+}
+
+.account-subtitle {
+  font-size: 10px;
+  font-family: Open Sans Light;
+}
+
+.account-password {
+  font-size: 20px;
+  font-family: Open Sans Light;
+}

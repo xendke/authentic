@@ -31,10 +31,8 @@ public class MainWindow : Gtk.Window {
 		set_application (app);
 		set_default_size (600, 468);
 		window_position = Gtk.WindowPosition.CENTER;
-
 		
-		//  StyleManager.add_stylesheet ("style/text.css");
-		//  StyleManager.add_stylesheet ("style/elements.css");
+		StyleManager.add_stylesheet ("styles/index.css");
 	
 		// Set up other GUI elements
 		setup_headerbar (app);
